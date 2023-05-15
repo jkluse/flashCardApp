@@ -14,6 +14,7 @@ body {
 	background-color: #0a092d;
 	color: #f6f7fb;
 	font-family: "Roboto", sans-serif;
+	border: none;
 }
 
 main {
@@ -24,14 +25,11 @@ main {
 	border-radius: 1.2rem;
 	padding: 3rem;
 	background-color: #394a67;
-	height: 50vh;
-	width: 60vw;
+
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	margin: 0 auto;
-	margin-bottom: 1.2rem;
 }
 
 .question,
@@ -121,4 +119,29 @@ main {
 }
 .list-items a:hover {
 	background-color: #2e3856;
+}
+
+.card {
+	height: 50vh;
+	width: 60vw;
+	margin-bottom: 5rem;
+}
+
+.results {
+	display: flex;
+	flex-direction: column;
+	gap: 4rem;
+}
+
+/* FORM */
+.form {
+	width: 100vw;
+}
+
+input[type="text"] {
+	width: 80%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	font-size: 1.2rem;
 }
