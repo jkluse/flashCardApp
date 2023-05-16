@@ -124,7 +124,7 @@ main {
 }
 
 .card {
-	height: 50vh;
+	height: 40vh;
 	width: 60vw;
 	margin-bottom: 5rem;
 }
@@ -166,6 +166,23 @@ input[name="text"] {
 	font-size: 1.2rem;
 }
 
+.add-card-text {
+	padding: 10px;
+	border-radius: 5px;
+	font-size: 1.2rem;
+	font-family: "Roboto", sans-serif;
+	border: 1px solid #4255ff;
+	width: 80%;
+	display: flex;
+	justify-content: center;
+	padding: 0.8rem;
+	transition: all 0.1s ease-in;
+}
+
+.add-card-text:hover {
+	background-color: #394a67;
+}
+
 .edit-form button {
 	padding: 10px;
 	border-radius: 5px;
@@ -196,10 +213,18 @@ input[name="text"] {
 }
 
 .form-submit {
-	padding: 10px;
+	padding: 15px;
+	border: none;
 	border-radius: 5px;
 	font-size: 1.2rem;
 	font-family: "Roboto", sans-serif;
+	transition: all 0.1s ease-in;
+	background: #4255ff;
+	color: #f6f7fb;
+}
+
+.form-submit:hover {
+	background: #586380;
 }
 
 .edit-btn,

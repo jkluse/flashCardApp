@@ -1,9 +1,7 @@
 const resultDiv = document.querySelector(".results");
 
-function getQuestions(e) {
+function getQuestions(subj) {
 	formSection.innerHTML = "";
-
-	const subj = e.target.textContent;
 	resultDiv.innerHTML = "";
 	editSection.innerHTML = "";
 
@@ -48,21 +46,27 @@ function handleDropDown() {
 
 // on load
 function loadLib() {
+	// prevent bug with multiple event listeners
+	listItems.removeEventListener("click", callGetQuestion);
+
 	listItems.innerHTML = "";
 	fetch("/api/subjects")
 		.then((res) => res.json())
 		.then((result) => {
-			// console.log(result);
 			for (let sub of result) {
 				const html = `<a class="added-subj" href="#">${sub.subject_name}</a>`;
 				listItems.insertAdjacentHTML("beforeend", html);
 			}
-			listItems.addEventListener("click", (e) => {
-				getQuestions(e);
-			});
+
+			listItems.addEventListener("click", callGetQuestion);
 		});
 }
 loadLib();
+
+// needed a named function IOT remove event listeners
+function callGetQuestion(e) {
+	getQuestions(e.target.textContent);
+}
 
 // Create new Deck
 const addCardsBtn = document.querySelector(".add-cards");
@@ -80,33 +84,40 @@ function showForm() {
 	editSection.innerHTML = "";
 	const html = `
 	<form class="form">
-		<div><label class="form-header" for="topic">Create a new study set: </label></div>
+		<div><label class="form-header" for="topic">Create a new flashcard deck: </label></div>
 		<input type="text" name="topic" class="topic" id="topic" placeholder="Enter a topic (ie. Data Structures, Chemistry, etc...)" required />
 		<br>
 		<br>
 		<br>
 		<div class="question-container">
 			<div class="q-num">1</div>
-			<input type="text" name="question1" class="question"  placeholder="Enter term...)" required  title="This field is required"/>
+			<input type="text" name="question1" class="question"  placeholder="Enter term...)" required/>
 			<div class="label-text">TERM</div>
 			<br>
-			<input type="text" name="answer1" class="answer"  placeholder="Enter definition...)" required  title="This field is required"/>
+			<input type="text" name="answer1" class="answer"  placeholder="Enter definition...)" required/>
 			<div class="label-text">DEFINITION</div>
 			<br>
 
 			<div class="q-num">2</div>
-			<input type="text" name="question2" class="question"  placeholder="Enter term...)" required  title="This field is required"/>
+			<input type="text" name="question2" class="question"  placeholder="Enter term...)" required/>
 			<div class="label-text">TERM</div>
 			<br>
-			<input type="text" name="answer2" class="answer"  placeholder="Enter definition...)" required  title="This field is required"/>
+			<input type="text" name="answer2" class="answer"  placeholder="Enter definition...)" required/>
 			<div class="label-text">DEFINITION</div>
 			<br>
+			<div class="add-another-card">
+				<p class="add-card-text"> + ADD CARD</p>
+			</div>
 
 			<input type="submit" value="Submit" class ="form-submit">
 			</div>
 		</form>
 	`;
 	formSection.insertAdjacentHTML("beforeend", html);
+
+	// adds fields to form to add another term
+	const addTermEl = document.querySelector(".add-another-card");
+	addTermEl.addEventListener("click", addTerm);
 
 	const formEl = document.querySelector(".form");
 	formEl.addEventListener("submit", createDeck);
@@ -116,6 +127,7 @@ function showForm() {
 function createDeck(e) {
 	e.preventDefault();
 	const data = new FormData(e.target);
+	const topic = data.get("topic");
 
 	fetch("api/questions", {
 		method: "POST",
@@ -123,7 +135,7 @@ function createDeck(e) {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
-			topic: data.get("topic"),
+			topic: topic,
 			qa_pairs: [
 				[data.get("question1"), data.get("answer1")],
 				[data.get("question2"), data.get("answer2")],
@@ -133,7 +145,7 @@ function createDeck(e) {
 		.then((res) => res.json())
 		.then((result) => {
 			loadLib();
-			showForm();
+			getQuestions(topic);
 		});
 }
 
@@ -150,7 +162,6 @@ function editCards() {
 	fetch("/api/subjects")
 		.then((res) => res.json())
 		.then((result) => {
-			// console.log(result);
 			for (let sub of result) {
 				const html = `
 			<div class="sub-edit-wrapper">
@@ -174,7 +185,7 @@ function rename(e) {
 	const originalText = p.textContent;
 	const form = `
 	<form class="edit-form">
-	<input id="text" name="text" value=${originalText} required/>
+	<input id="text" name="text" value="${originalText}" required/>
 	<button type="submit">Update</button>
 	</form>
 	`;
@@ -193,16 +204,16 @@ function handleEditName(e, originalText) {
 	const editForm = document.querySelector(".edit-form");
 	const data = new FormData(e.target);
 	const updatedName = data.get("text");
-	console.log(originalText, updatedName);
 
 	// replace input form with updated name
 	// 1. fetch PATCH with updatedName
 	fetch(`/api/subjects/${originalText}/${updatedName}`, {
 		method: "PATCH",
+	}).then((result) => {
+		// 2. Reload editCards & Library dropdown
+		loadLib();
+		editCards();
 	});
-	// 2. Reload editCards
-	editCards();
-	loadLib();
 }
 
 function deleteTopic(e) {
@@ -210,8 +221,28 @@ function deleteTopic(e) {
 	fetch(`/api/subjects/${topicId}`, { method: "DELETE" })
 		.then((res) => res.json())
 		.then((result) => {
-			console.log(result);
 			editCards();
 			loadLib();
 		});
+}
+
+// used to increment values in form
+let termCount = 2;
+
+function addTerm(e) {
+	termCount++;
+	const addTermEl = document.querySelector(".add-another-card");
+
+	const html = `
+	<br>
+	<div class="question-container">
+		<div class="q-num">${termCount}</div>
+		<input type="text" name="question${termCount}" class="question"  placeholder="Enter term...)" required/>
+		<div class="label-text">TERM</div>
+		<br>
+		<input type="text" name="answer${termCount}" class="answer"  placeholder="Enter definition...)" required/>
+	<div class="label-text">DEFINITION</div>
+	`;
+
+	addTermEl.insertAdjacentHTML("beforebegin", html);
 }
