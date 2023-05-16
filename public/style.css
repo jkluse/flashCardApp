@@ -18,7 +18,7 @@ body {
 }
 
 main {
-	padding: 4.8rem;
+	/* padding: 4.8rem; */
 }
 
 .qdiv {
@@ -35,8 +35,9 @@ main {
 .question,
 .answer {
 	font-weight: 300;
-	padding: 2rem 0;
+	padding: 2rem;
 	font-size: 1.6rem;
+	margin: 0.4rem 0;
 }
 
 .add-cards {
@@ -65,6 +66,7 @@ main {
 	font-weight: 500;
 	padding-left: 1.4rem;
 	position: relative;
+	margin-bottom: 2rem;
 }
 
 .nav-wrapper a {
@@ -130,12 +132,24 @@ main {
 .results {
 	display: flex;
 	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 	gap: 4rem;
+	position: relative;
 }
 
-/* FORM */
-.form {
-	width: 100vw;
+/* CREAT FORM */
+.form-section {
+	width: 80vw;
+	margin: 0 auto;
+}
+
+.form-header {
+	font-size: 1.3rem;
+}
+
+#topic {
+	margin-top: 0.4rem;
 }
 
 input[type="text"] {
@@ -143,5 +157,85 @@ input[type="text"] {
 	padding: 10px;
 	border: 1px solid #ccc;
 	border-radius: 5px;
+	font-size: 1.2rem;
+}
+input[name="text"] {
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	font-size: 1.2rem;
+}
+
+.edit-form button {
+	padding: 10px;
+	border-radius: 5px;
+	font-size: 1.2rem;
+	font-family: "Roboto", sans-serif;
+}
+
+.label-text {
+	font-size: 0.8rem;
+}
+
+.label-text,
+.q-num {
+	padding-left: 0.4rem;
+}
+
+.controls {
+	display: flex;
+	gap: 8rem;
+	justify-content: space-around;
+}
+
+.controls img {
+	border: 1px solid #f6f7fb;
+	border-radius: 50%;
+	padding: 0.55rem;
+	margin-top: -2.5rem;
+}
+
+.form-submit {
+	padding: 10px;
+	border-radius: 5px;
+	font-size: 1.2rem;
+	font-family: "Roboto", sans-serif;
+}
+
+.edit-btn,
+.delete-btn {
+	background: none;
+	border: none;
+}
+
+.sub-edit-wrapper {
+	display: flex;
+	flex-grow: 0;
+	background-color: #2e3856;
+	border-radius: 5px;
+	gap: 1rem;
+	padding: 1rem;
+	/* margin: 0 4rem 2rem; */
+	margin: 0 auto 2rem auto;
+	max-width: 50vw;
+}
+
+.sub-edit-wrapper img {
+	padding: 6px;
+	border: 1px solid #2e3856;
+}
+
+.sub-edit-wrapper img:hover {
+	border: 1px solid #f6f7fb;
+	border-radius: 50%;
+	background: #0a092d;
+}
+
+.right-btn:hover,
+.wrong-btn:hover {
+	background: #394a67;
+}
+
+.added-subj {
 	font-size: 1.2rem;
 }
