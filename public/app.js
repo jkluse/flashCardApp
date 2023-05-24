@@ -1,5 +1,8 @@
 const resultDiv = document.querySelector(".results");
 
+// used to increment form values in form
+let termCount = 0;
+
 function getQuestions(subj) {
 	formSection.innerHTML = "";
 	resultDiv.innerHTML = "";
@@ -44,7 +47,7 @@ function handleDropDown() {
 	dropdownEl.classList.toggle("show");
 }
 
-// on load
+// on load + remove eventlisteners
 function loadLib() {
 	// prevent bug with multiple event listeners
 	listItems.removeEventListener("click", callGetQuestion);
@@ -75,6 +78,7 @@ const formSection = document.querySelector(".form-section");
 addCardsBtn.addEventListener("click", showForm);
 
 function showForm() {
+	termCount = 0;
 	if (dropdownEl.classList.contains("show")) {
 		handleDropDown();
 	}
@@ -91,18 +95,18 @@ function showForm() {
 		<br>
 		<div class="question-container">
 			<div class="q-num">1</div>
-			<input type="text" name="question1" class="question"  placeholder="Enter term...)" required/>
+			<input type="text" name="question${++termCount}" class="question"  placeholder="Enter term..." required/>
 			<div class="label-text">TERM</div>
 			<br>
-			<input type="text" name="answer1" class="answer"  placeholder="Enter definition...)" required/>
+			<input type="text" name="answer${termCount}" class="answer"  placeholder="Enter definition..." required/>
 			<div class="label-text">DEFINITION</div>
 			<br>
 
 			<div class="q-num">2</div>
-			<input type="text" name="question2" class="question"  placeholder="Enter term...)" required/>
+			<input type="text" name="question${++termCount}" class="question"  placeholder="Enter term..." required/>
 			<div class="label-text">TERM</div>
 			<br>
-			<input type="text" name="answer2" class="answer"  placeholder="Enter definition...)" required/>
+			<input type="text" name="answer${termCount}" class="answer"  placeholder="Enter definition..." required/>
 			<div class="label-text">DEFINITION</div>
 			<br>
 			<div class="add-another-card">
@@ -129,6 +133,19 @@ function createDeck(e) {
 	const data = new FormData(e.target);
 	const topic = data.get("topic");
 
+	let dataArr = [];
+	for (let pair of data.entries()) {
+		dataArr.push(pair[1]);
+	}
+
+	// removes first entry (topic), leaving just Q & A
+	dataArr.shift();
+	let questions = [];
+
+	for (let i = 0; i < dataArr.length; i += 2) {
+		questions.push([dataArr[i], dataArr[i + 1]]);
+	}
+
 	fetch("api/questions", {
 		method: "POST",
 		headers: {
@@ -136,10 +153,8 @@ function createDeck(e) {
 		},
 		body: JSON.stringify({
 			topic: topic,
-			qa_pairs: [
-				[data.get("question1"), data.get("answer1")],
-				[data.get("question2"), data.get("answer2")],
-			],
+			qa_pairs: questions,
+			data: dataArr,
 		}),
 	})
 		.then((res) => res.json())
@@ -226,21 +241,19 @@ function deleteTopic(e) {
 		});
 }
 
-// used to increment values in form
-let termCount = 2;
-
 function addTerm(e) {
 	termCount++;
+
 	const addTermEl = document.querySelector(".add-another-card");
 
 	const html = `
 	<br>
 	<div class="question-container">
 		<div class="q-num">${termCount}</div>
-		<input type="text" name="question${termCount}" class="question"  placeholder="Enter term...)" required/>
+		<input type="text" name="question${termCount}" class="question"  placeholder="Enter term..." required/>
 		<div class="label-text">TERM</div>
 		<br>
-		<input type="text" name="answer${termCount}" class="answer"  placeholder="Enter definition...)" required/>
+		<input type="text" name="answer${termCount}" class="answer"  placeholder="Enter definition..." required/>
 	<div class="label-text">DEFINITION</div>
 	`;
 

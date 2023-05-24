@@ -43,6 +43,7 @@ server.patch("/api/subjects/:oldName/:newName", (req, res) => {
 server.post("/api/questions", (req, res) => {
 	const topic = req.body.topic;
 	const qa_pairs = req.body.qa_pairs;
+	const promises = [];
 
 	//create new topic RETURNING id
 	db.query("INSERT INTO subject (subject_name) VALUES ($1) RETURNING id", [topic])
@@ -52,23 +53,26 @@ server.post("/api/questions", (req, res) => {
 			//With id, add all qa_pairs to question_answer table
 			const id = Number(result.rows[0].id);
 
-			db.query("INSERT INTO question_answer (question, answer, subject_id) VALUES($1, $2, $3), ($4, $5, $6) RETURNING *", [
-				qa_pairs[0][0],
-				qa_pairs[0][1],
-				id,
-				qa_pairs[1][0],
-				qa_pairs[1][1],
-				id,
-			]).then((result) => {
-				if (result.rows.length === 0) res.sendStatus(500);
-			});
-			res.status(201).json({
-				message: "success",
-				data: result.rows,
+			// Using ID, INSERT Q & A into DB
+			for (let pair of qa_pairs) {
+				promises.push(db.query("INSERT INTO question_answer (question, answer, subject_id) VALUES($1, $2, $3) RETURNING *", [pair[0], pair[1], id]));
+			}
+
+			return Promise.all(promises).then((result) => {
+				let createdElements = [];
+				for (let el of result) {
+					createdElements.push(el.rows[0]);
+				}
+				// if (result.rows.length === 0) res.sendStatus(500);
+				res.status(201).json({
+					message: "success",
+					data: createdElements,
+				});
 			});
 		})
 		.catch((err) => {
-			throw err;
+			console.log(err);
+			res.sendStatus(500);
 		});
 });
 
@@ -83,10 +87,39 @@ server.delete("/api/subjects/:id", (req, res) => {
 			return db.query("DELETE FROM subject WHERE id = $1 RETURNING subject_name;", [id]);
 		})
 		.then((result) => {
-			if (result.rows.length === 0) return res.status(404).json({ status: "fail", reason: "Topic Not found" });
+			if (!result.rows.length === 0) return res.status(404).json({ status: "fail", reason: "Topic Not found" });
 
 			res.status(200).json({ status: "success", deleted: result.rows[0].subject_name });
 		});
 });
 
 server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+
+async function insertData(data) {
+	const client = new Client({
+		// PostgreSQL connection configuration
+		// ...
+	});
+
+	try {
+		await client.connect();
+
+		// Create an array of placeholders for the dynamic values
+		const valuePlaceholders = data.map((item, index) => `$${index + 1}`);
+
+		// Construct the INSERT INTO query with dynamic values
+		const query = `
+      INSERT INTO your_table_name (column1, column2, column3, ...)
+      VALUES (${valuePlaceholders.join(", ")})
+    `;
+
+		// Execute the query with the data values
+		const result = await client.query(query, data);
+
+		console.log(`Inserted ${result.rowCount} row(s)`);
+	} catch (error) {
+		console.error("Error inserting data:", error);
+	} finally {
+		await client.end();
+	}
+}
